@@ -1,0 +1,33 @@
+# Maven build output
+target/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Java crash logs
+hs_err_pid*
+replay_pid*
+
+# Temporary files
+*.tmp
+*.swp
+*~
