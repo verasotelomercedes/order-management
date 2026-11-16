@@ -1,6 +1,6 @@
 package com.verasotelomercedes.ordermanagement.order.application;
 
-import com.verasotelomercedes.ordermanagement.logistics.application.LogisticsRateRequest;
+import com.verasotelomercedes.ordermanagement.order.domain.ShippingRateRequest;
 import com.verasotelomercedes.ordermanagement.order.domain.Order;
 import com.verasotelomercedes.ordermanagement.order.domain.ports.outbound.OrderRepositoryPort;
 import org.springframework.stereotype.Service;
@@ -20,11 +20,11 @@ public class OrderStateManager {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public LogisticsRateRequest startConfirmation(Long orderId) {
+    public ShippingRateRequest startConfirmation(Long orderId) {
         Order order = findOrder(orderId);
         order.startConfirmation();
         orderRepository.save(order);
-        return new LogisticsRateRequest(
+        return new ShippingRateRequest(
                 order.getDestinationPostalCode(),
                 order.calculateTotalWeightKg(),
                 1);

@@ -37,7 +37,7 @@ public class OrderLineEntity {
     @Column(nullable = false)
     private Integer quantity;
 
-    @Column(nullable = false, precision = 19, scale = 2)
+    @Column(nullable = false, precision = 19, scale = 4)
     private BigDecimal unitPrice;
 
     @Column(nullable = false, precision = 10, scale = 3)

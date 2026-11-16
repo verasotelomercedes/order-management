@@ -1,7 +1,7 @@
 package com.verasotelomercedes.ordermanagement.order.application;
 
 import com.verasotelomercedes.ordermanagement.customer.domain.Customer;
-import com.verasotelomercedes.ordermanagement.logistics.application.LogisticsRateRequest;
+import com.verasotelomercedes.ordermanagement.order.domain.ShippingRateRequest;
 import com.verasotelomercedes.ordermanagement.order.domain.Order;
 import com.verasotelomercedes.ordermanagement.order.domain.OrderInput;
 import com.verasotelomercedes.ordermanagement.order.domain.OrderLineInput;
@@ -49,7 +49,7 @@ class OrderStateManagerTest {
     void shouldMoveOrderToConfirmingAndBuildRateRequest() {
         when(orderRepository.findById(10L)).thenReturn(Optional.of(order));
 
-        LogisticsRateRequest request = orderStateManager.startConfirmation(10L);
+        ShippingRateRequest request = orderStateManager.startConfirmation(10L);
 
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMING);
         assertThat(request.destinationPostalCode()).isEqualTo("28001");

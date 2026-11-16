@@ -1,8 +1,8 @@
-package com.verasotelomercedes.ordermanagement.logistics.application;
+package com.verasotelomercedes.ordermanagement.order.domain;
 
 import java.math.BigDecimal;
 
-public record LogisticsRate(
+public record ShippingRate(
         BigDecimal cost,
         String currency,
         Integer deliveryDays) {

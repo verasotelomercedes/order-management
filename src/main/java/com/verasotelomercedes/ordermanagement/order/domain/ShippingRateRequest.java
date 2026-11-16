@@ -1,8 +1,8 @@
-package com.verasotelomercedes.ordermanagement.logistics.application;
+package com.verasotelomercedes.ordermanagement.order.domain;
 
 import java.math.BigDecimal;
 
-public record LogisticsRateRequest(
+public record ShippingRateRequest(
         String destinationPostalCode,
         BigDecimal weightKg,
         int numberOfPackages) {

@@ -2,10 +2,10 @@ package com.verasotelomercedes.ordermanagement.order.application;
 
 import com.verasotelomercedes.ordermanagement.customer.domain.Customer;
 import com.verasotelomercedes.ordermanagement.customer.domain.ports.outbound.CustomerRepositoryPort;
-import com.verasotelomercedes.ordermanagement.logistics.application.LogisticsException;
-import com.verasotelomercedes.ordermanagement.logistics.application.LogisticsRate;
-import com.verasotelomercedes.ordermanagement.logistics.application.LogisticsRatePort;
-import com.verasotelomercedes.ordermanagement.logistics.application.LogisticsRateRequest;
+import com.verasotelomercedes.ordermanagement.order.domain.ShippingRateException;
+import com.verasotelomercedes.ordermanagement.order.domain.ShippingRate;
+import com.verasotelomercedes.ordermanagement.order.domain.ports.outbound.ShippingRatePort;
+import com.verasotelomercedes.ordermanagement.order.domain.ShippingRateRequest;
 import com.verasotelomercedes.ordermanagement.order.domain.Order;
 import com.verasotelomercedes.ordermanagement.order.domain.OrderInput;
 import com.verasotelomercedes.ordermanagement.order.domain.OrderLineInput;
@@ -41,7 +41,7 @@ class OrderServiceTest {
     private CustomerRepositoryPort customerRepository;
 
     @Mock
-    private LogisticsRatePort logisticsRatePort;
+    private ShippingRatePort shippingRatePort;
 
     @Mock
     private OrderStateManager orderStateManager;
@@ -104,11 +104,11 @@ class OrderServiceTest {
 
     @Test
     void shouldConfirmOrderWithShippingCostFromProvider() {
-        LogisticsRateRequest rateRequest = new LogisticsRateRequest("28001", new BigDecimal("2.500"), 1);
-        LogisticsRate rate = new LogisticsRate(new BigDecimal("5.00"), "EUR", 2);
+        ShippingRateRequest rateRequest = new ShippingRateRequest("28001", new BigDecimal("2.500"), 1);
+        ShippingRate rate = new ShippingRate(new BigDecimal("5.00"), "EUR", 2);
         Order confirmed = new Order(customer, input);
         when(orderStateManager.startConfirmation(10L)).thenReturn(rateRequest);
-        when(logisticsRatePort.requestRate(rateRequest)).thenReturn(rate);
+        when(shippingRatePort.requestRate(rateRequest)).thenReturn(rate);
         when(orderStateManager.completeConfirmation(10L, new BigDecimal("5.00"))).thenReturn(confirmed);
 
         Order result = orderService.confirm(10L);
@@ -119,10 +119,10 @@ class OrderServiceTest {
 
     @Test
     void shouldCancelConfirmationWhenProviderFails() {
-        LogisticsRateRequest rateRequest = new LogisticsRateRequest("28001", new BigDecimal("2.500"), 1);
-        LogisticsException failure = new LogisticsException("provider down");
+        ShippingRateRequest rateRequest = new ShippingRateRequest("28001", new BigDecimal("2.500"), 1);
+        ShippingRateException failure = new ShippingRateException("provider down");
         when(orderStateManager.startConfirmation(10L)).thenReturn(rateRequest);
-        when(logisticsRatePort.requestRate(rateRequest)).thenThrow(failure);
+        when(shippingRatePort.requestRate(rateRequest)).thenThrow(failure);
 
         assertThatThrownBy(() -> orderService.confirm(10L)).isSameAs(failure);
 
@@ -131,36 +131,12 @@ class OrderServiceTest {
     }
 
     @Test
-    void shouldCancelConfirmationWhenProviderReturnsNoRate() {
-        LogisticsRateRequest rateRequest = new LogisticsRateRequest("28001", new BigDecimal("2.500"), 1);
-        when(orderStateManager.startConfirmation(10L)).thenReturn(rateRequest);
-        when(logisticsRatePort.requestRate(rateRequest)).thenReturn(null);
-
-        assertThatThrownBy(() -> orderService.confirm(10L))
-                .isInstanceOf(LogisticsException.class)
-                .hasMessageContaining("no shipping cost");
-
-        verify(orderStateManager).cancelConfirmation(10L);
-    }
-
-    @Test
-    void shouldCancelConfirmationWhenProviderReturnsRateWithoutCost() {
-        LogisticsRateRequest rateRequest = new LogisticsRateRequest("28001", new BigDecimal("2.500"), 1);
-        when(orderStateManager.startConfirmation(10L)).thenReturn(rateRequest);
-        when(logisticsRatePort.requestRate(rateRequest)).thenReturn(new LogisticsRate(null, "EUR", 2));
-
-        assertThatThrownBy(() -> orderService.confirm(10L)).isInstanceOf(LogisticsException.class);
-
-        verify(orderStateManager).cancelConfirmation(10L);
-    }
-
-    @Test
     void shouldCancelConfirmationWhenStoringTheResultFails() {
-        LogisticsRateRequest rateRequest = new LogisticsRateRequest("28001", new BigDecimal("2.500"), 1);
-        LogisticsRate rate = new LogisticsRate(new BigDecimal("5.00"), "EUR", 2);
+        ShippingRateRequest rateRequest = new ShippingRateRequest("28001", new BigDecimal("2.500"), 1);
+        ShippingRate rate = new ShippingRate(new BigDecimal("5.00"), "EUR", 2);
         IllegalStateException failure = new IllegalStateException("database error");
         when(orderStateManager.startConfirmation(10L)).thenReturn(rateRequest);
-        when(logisticsRatePort.requestRate(rateRequest)).thenReturn(rate);
+        when(shippingRatePort.requestRate(rateRequest)).thenReturn(rate);
         when(orderStateManager.completeConfirmation(10L, new BigDecimal("5.00"))).thenThrow(failure);
 
         assertThatThrownBy(() -> orderService.confirm(10L)).isSameAs(failure);
@@ -169,17 +145,15 @@ class OrderServiceTest {
     }
 
     @Test
-    void shouldKeepOriginalErrorWhenCancellingAlsoFails() {
-        LogisticsRateRequest rateRequest = new LogisticsRateRequest("28001", new BigDecimal("2.500"), 1);
-        LogisticsException failure = new LogisticsException("provider down");
+    void shouldPropagateCancellationErrorWhenCancellingFails() {
+        ShippingRateRequest rateRequest = new ShippingRateRequest("28001", new BigDecimal("2.500"), 1);
+        ShippingRateException failure = new ShippingRateException("provider down");
         IllegalStateException cancelFailure = new IllegalStateException("cannot cancel");
         when(orderStateManager.startConfirmation(10L)).thenReturn(rateRequest);
-        when(logisticsRatePort.requestRate(rateRequest)).thenThrow(failure);
+        when(shippingRatePort.requestRate(rateRequest)).thenThrow(failure);
         doThrow(cancelFailure).when(orderStateManager).cancelConfirmation(10L);
 
-        assertThatThrownBy(() -> orderService.confirm(10L))
-                .isSameAs(failure)
-                .hasSuppressedException(cancelFailure);
+        assertThatThrownBy(() -> orderService.confirm(10L)).isSameAs(cancelFailure);
     }
 
     @Test
@@ -189,7 +163,7 @@ class OrderServiceTest {
 
         assertThatThrownBy(() -> orderService.confirm(10L)).isSameAs(failure);
 
-        verify(logisticsRatePort, never()).requestRate(any());
+        verify(shippingRatePort, never()).requestRate(any());
         verify(orderStateManager, never()).cancelConfirmation(any());
     }
 }

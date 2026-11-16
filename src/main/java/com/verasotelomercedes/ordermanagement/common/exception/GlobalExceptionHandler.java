@@ -2,7 +2,7 @@ package com.verasotelomercedes.ordermanagement.common.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
-import com.verasotelomercedes.ordermanagement.logistics.application.LogisticsException;
+import com.verasotelomercedes.ordermanagement.order.domain.ShippingRateException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,8 +23,8 @@ public class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, ex.getMessage());
     }
 
-    @ExceptionHandler(LogisticsException.class)
-    public ProblemDetail handleLogistics(LogisticsException ex) {
+    @ExceptionHandler(ShippingRateException.class)
+    public ProblemDetail handleLogistics(ShippingRateException ex) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_GATEWAY, ex.getMessage());
     }
 

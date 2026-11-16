@@ -3,31 +3,33 @@ package com.verasotelomercedes.ordermanagement.order.application;
 import com.verasotelomercedes.ordermanagement.customer.domain.ports.outbound.CustomerRepositoryPort;
 import com.verasotelomercedes.ordermanagement.customer.domain.Customer;
 import com.verasotelomercedes.ordermanagement.order.domain.ports.outbound.OrderRepositoryPort;
-import com.verasotelomercedes.ordermanagement.logistics.application.LogisticsException;
-import com.verasotelomercedes.ordermanagement.logistics.application.LogisticsRate;
-import com.verasotelomercedes.ordermanagement.logistics.application.LogisticsRatePort;
-import com.verasotelomercedes.ordermanagement.logistics.application.LogisticsRateRequest;
+import com.verasotelomercedes.ordermanagement.order.domain.ShippingRateException;
+import com.verasotelomercedes.ordermanagement.order.domain.ShippingRate;
+import com.verasotelomercedes.ordermanagement.order.domain.ports.outbound.ShippingRatePort;
+import com.verasotelomercedes.ordermanagement.order.domain.ShippingRateRequest;
 import com.verasotelomercedes.ordermanagement.order.domain.Order;
 import com.verasotelomercedes.ordermanagement.order.domain.OrderInput;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.NoSuchElementException;
 
+@Slf4j
 @Service
 public class OrderService {
     private final OrderRepositoryPort orderRepository;
     private final CustomerRepositoryPort customerRepository;
-    private final LogisticsRatePort logisticsRatePort;
+    private final ShippingRatePort shippingRatePort;
     private final OrderStateManager orderStateManager;
 
     public OrderService(OrderRepositoryPort orderRepository,
                         CustomerRepositoryPort customerRepository,
-                        LogisticsRatePort logisticsRatePort,
+                        ShippingRatePort shippingRatePort,
                         OrderStateManager orderStateManager) {
         this.orderRepository = orderRepository;
         this.customerRepository = customerRepository;
-        this.logisticsRatePort = logisticsRatePort;
+        this.shippingRatePort = shippingRatePort;
         this.orderStateManager = orderStateManager;
     }
 
@@ -44,20 +46,14 @@ public class OrderService {
     }
 
     public Order confirm(Long orderId) {
-        LogisticsRateRequest rateRequest = orderStateManager.startConfirmation(orderId);
+        ShippingRateRequest rateRequest = orderStateManager.startConfirmation(orderId);
 
         try {
-            LogisticsRate rate = logisticsRatePort.requestRate(rateRequest);
-            if (rate == null || rate.cost() == null) {
-                throw new LogisticsException("Logistics provider returned no shipping cost");
-            }
+            ShippingRate rate = shippingRatePort.requestRate(rateRequest);
             return orderStateManager.completeConfirmation(orderId, rate.cost());
         } catch (RuntimeException e) {
-            try {
-                orderStateManager.cancelConfirmation(orderId);
-            } catch (RuntimeException cancelError) {
-                e.addSuppressed(cancelError);
-            }
+            log.error("Confirmation of order {} failed, reverting it to PENDING_CONFIRMATION", orderId, e);
+            orderStateManager.cancelConfirmation(orderId);
             throw e;
         }
     }

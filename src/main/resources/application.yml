@@ -13,3 +13,10 @@ spring:
     hibernate:
       ddl-auto: update
     show-sql: true
+logistics:
+  base-url: ${LOGISTICS_BASE_URL:http://localhost:9090}
+  token: ${LOGISTICS_TOKEN:}
+  connect-timeout: 2s
+  read-timeout: 6s
+  max-retries: 2
+  retry-backoff: 300ms
