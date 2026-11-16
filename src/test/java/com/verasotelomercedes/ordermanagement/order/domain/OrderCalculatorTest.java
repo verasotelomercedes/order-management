@@ -14,8 +14,8 @@ class OrderCalculatorTest {
     @Test
     void productAmountSumsLineAmountsWithTwoDecimals() {
         List<OrderLine> lines = List.of(
-                new OrderLine("A", 3, new BigDecimal("0.10"), new BigDecimal("1")),
-                new OrderLine("B", 2, new BigDecimal("19.99"), new BigDecimal("1")));
+                OrderLine.builder().product("A").quantity(3).unitPrice(new BigDecimal("0.10")).unitWeightKg(new BigDecimal("1")).build(),
+                OrderLine.builder().product("B").quantity(2).unitPrice(new BigDecimal("19.99")).unitWeightKg(new BigDecimal("1")).build());
 
         BigDecimal amount = calculator.calculateProductAmount(lines);
 
@@ -25,8 +25,8 @@ class OrderCalculatorTest {
     @Test
     void lineAmountIsRoundedHalfUpBeforeSummingLines() {
         List<OrderLine> lines = List.of(
-                new OrderLine("A", 1, new BigDecimal("0.005"), new BigDecimal("1")),
-                new OrderLine("B", 1, new BigDecimal("0.005"), new BigDecimal("1")));
+                OrderLine.builder().product("A").quantity(1).unitPrice(new BigDecimal("0.005")).unitWeightKg(new BigDecimal("1")).build(),
+                OrderLine.builder().product("B").quantity(1).unitPrice(new BigDecimal("0.005")).unitWeightKg(new BigDecimal("1")).build());
 
         BigDecimal amount = calculator.calculateProductAmount(lines);
 
@@ -50,8 +50,8 @@ class OrderCalculatorTest {
     @Test
     void totalWeightSumsLinesWithThreeDecimals() {
         List<OrderLine> lines = List.of(
-                new OrderLine("A", 3, new BigDecimal("10.00"), new BigDecimal("0.500")),
-                new OrderLine("B", 1, new BigDecimal("2.50"), new BigDecimal("1.0005")));
+                OrderLine.builder().product("A").quantity(3).unitPrice(new BigDecimal("10.00")).unitWeightKg(new BigDecimal("0.500")).build(),
+                OrderLine.builder().product("B").quantity(1).unitPrice(new BigDecimal("2.50")).unitWeightKg(new BigDecimal("1.0005")).build());
 
         BigDecimal weight = calculator.calculateTotalWeightKg(lines);
 

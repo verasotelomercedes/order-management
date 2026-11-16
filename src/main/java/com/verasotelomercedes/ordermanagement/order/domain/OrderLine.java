@@ -1,8 +1,12 @@
 package com.verasotelomercedes.ordermanagement.order.domain;
 
+import lombok.Builder;
+import lombok.Getter;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 
+@Getter
 public class OrderLine {
     public static final int UNIT_PRICE_SCALE = 4;
     public static final int WEIGHT_SCALE = 3;
@@ -13,10 +17,7 @@ public class OrderLine {
     private final BigDecimal unitPrice;
     private final BigDecimal unitWeightKg;
 
-    public OrderLine(String product, Integer quantity, BigDecimal unitPrice, BigDecimal unitWeightKg) {
-        this(null, product, quantity, unitPrice, unitWeightKg);
-    }
-
+    @Builder
     public OrderLine(Long id, String product, Integer quantity, BigDecimal unitPrice, BigDecimal unitWeightKg) {
         if (product == null || product.isBlank()) {
             throw new IllegalArgumentException("product must not be blank");
@@ -43,25 +44,5 @@ public class OrderLine {
 
     public BigDecimal calculateTotalWeightKg() {
         return unitWeightKg.multiply(BigDecimal.valueOf(quantity)).setScale(WEIGHT_SCALE, RoundingMode.HALF_UP);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getProduct() {
-        return product;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
-    }
-
-    public BigDecimal getUnitWeightKg() {
-        return unitWeightKg;
     }
 }

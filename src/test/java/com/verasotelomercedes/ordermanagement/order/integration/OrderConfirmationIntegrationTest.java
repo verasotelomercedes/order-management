@@ -184,7 +184,7 @@ class OrderConfirmationIntegrationTest {
 
     private Order createOrder() {
         Customer customer = customerService.create(
-                new Customer("Jane Doe", UUID.randomUUID() + "@example.com"));
+                Customer.builder().name("Jane Doe").email(UUID.randomUUID() + "@example.com").build());
         return orderService.create(new OrderInput(customer.getId(), "43840", List.of(
                 new OrderLineInput("A", 3, new BigDecimal("10.005"), new BigDecimal("0.500")),
                 new OrderLineInput("B", 1, new BigDecimal("2.50"), new BigDecimal("1.000")))));

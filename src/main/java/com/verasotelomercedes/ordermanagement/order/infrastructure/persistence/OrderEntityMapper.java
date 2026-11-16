@@ -42,17 +42,17 @@ public class OrderEntityMapper {
 
     public Order toDomain(OrderEntity entity) {
         List<OrderLine> lines = entity.getLines().stream()
-                .map(line -> new OrderLine(line.getId(), line.getProduct(), line.getQuantity(),
-                        line.getUnitPrice(), line.getUnitWeightKg()))
+                .map(line -> OrderLine.builder().id(line.getId()).product(line.getProduct()).quantity(line.getQuantity()).unitPrice(line.getUnitPrice()).unitWeightKg(line.getUnitWeightKg()).build())
                 .toList();
-        return Order.restore(
-                entity.getId(),
-                customerMapper.toDomain(entity.getCustomer()),
-                entity.getStatus(),
-                entity.getDestinationPostalCode(),
-                entity.getProductAmount(),
-                entity.getShippingCost(),
-                entity.getTotalAmount(),
-                lines);
+        return Order.builder()
+                .id(entity.getId())
+                .customer(customerMapper.toDomain(entity.getCustomer()))
+                .status(entity.getStatus())
+                .destinationPostalCode(entity.getDestinationPostalCode())
+                .productAmount(entity.getProductAmount())
+                .shippingCost(entity.getShippingCost())
+                .totalAmount(entity.getTotalAmount())
+                .lines(lines)
+                .build();
     }
 }

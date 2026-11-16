@@ -2,12 +2,16 @@ package com.verasotelomercedes.ordermanagement.order.domain;
 
 import com.verasotelomercedes.ordermanagement.customer.domain.Customer;
 
+import lombok.Builder;
+import lombok.Getter;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+@Getter
 public class Order {
     private static final OrderCalculator CALCULATOR = new OrderCalculator();
 
@@ -24,21 +28,27 @@ public class Order {
         this.id = null;
         this.customer = Objects.requireNonNull(customer, "customer must not be null");
         Objects.requireNonNull(input, "input must not be null");
-        if (input.destinationPostalCode() == null || !input.destinationPostalCode().matches("\\d{5}")) {
+        if (input.getDestinationPostalCode() == null || !input.getDestinationPostalCode().matches("\\d{5}")) {
             throw new IllegalArgumentException("destinationPostalCode must be exactly 5 digits");
         }
-        if (input.lines() == null || input.lines().isEmpty()) {
+        if (input.getLines() == null || input.getLines().isEmpty()) {
             throw new IllegalArgumentException("lines must not be empty");
         }
-        this.destinationPostalCode = input.destinationPostalCode();
+        this.destinationPostalCode = input.getDestinationPostalCode();
         this.status = OrderStatus.PENDING_CONFIRMATION;
         this.productAmount = new BigDecimal("0.00");
         this.totalAmount = new BigDecimal("0.00");
         this.shippingCost = null;
-        input.lines().forEach(line -> addLine(
-                new OrderLine(line.product(), line.quantity(), line.unitPrice(), line.unitWeightKg())));
+        input.getLines().forEach(line -> addLine(
+                OrderLine.builder()
+                        .product(line.getProduct())
+                        .quantity(line.getQuantity())
+                        .unitPrice(line.getUnitPrice())
+                        .unitWeightKg(line.getUnitWeightKg())
+                        .build()));
     }
 
+    @Builder
     private Order(Long id, Customer customer, OrderStatus status, String destinationPostalCode,
                   BigDecimal productAmount, BigDecimal shippingCost, BigDecimal totalAmount,
                   List<OrderLine> lines) {
@@ -50,13 +60,6 @@ public class Order {
         this.shippingCost = shippingCost;
         this.totalAmount = totalAmount;
         this.lines.addAll(lines);
-    }
-
-    public static Order restore(Long id, Customer customer, OrderStatus status, String destinationPostalCode,
-                                BigDecimal productAmount, BigDecimal shippingCost, BigDecimal totalAmount,
-                                List<OrderLine> lines) {
-        return new Order(id, customer, status, destinationPostalCode,
-                productAmount, shippingCost, totalAmount, lines);
     }
 
     public void addLine(OrderLine line) {
@@ -96,34 +99,6 @@ public class Order {
         if (status != expected) {
             throw new IllegalStateException("Order " + id + " must be " + expected + " but is " + status);
         }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Customer getCustomer() {
-        return customer;
-    }
-
-    public OrderStatus getStatus() {
-        return status;
-    }
-
-    public String getDestinationPostalCode() {
-        return destinationPostalCode;
-    }
-
-    public BigDecimal getProductAmount() {
-        return productAmount;
-    }
-
-    public BigDecimal getShippingCost() {
-        return shippingCost;
-    }
-
-    public BigDecimal getTotalAmount() {
-        return totalAmount;
     }
 
     public List<OrderLine> getLines() {

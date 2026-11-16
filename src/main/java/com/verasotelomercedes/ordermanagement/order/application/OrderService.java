@@ -35,8 +35,8 @@ public class OrderService {
 
     @Transactional
     public Order create(OrderInput input) {
-        Customer customer = customerRepository.findById(input.customerId())
-                .orElseThrow(() -> new NoSuchElementException("Customer not found: " + input.customerId()));
+        Customer customer = customerRepository.findById(input.getCustomerId())
+                .orElseThrow(() -> new NoSuchElementException("Customer not found: " + input.getCustomerId()));
         return orderRepository.save(new Order(customer, input));
     }
 
@@ -50,7 +50,7 @@ public class OrderService {
 
         try {
             ShippingRate rate = shippingRatePort.requestRate(rateRequest);
-            return orderStateManager.completeConfirmation(orderId, rate.cost());
+            return orderStateManager.completeConfirmation(orderId, rate.getCost());
         } catch (RuntimeException e) {
             log.error("Confirmation of order {} failed, reverting it to PENDING_CONFIRMATION", orderId, e);
             orderStateManager.cancelConfirmation(orderId);

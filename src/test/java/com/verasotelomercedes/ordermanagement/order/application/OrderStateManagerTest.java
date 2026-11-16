@@ -42,7 +42,7 @@ class OrderStateManagerTest {
         OrderInput input = new OrderInput(1L, "28001", List.of(
                 new OrderLineInput("A", 2, new BigDecimal("10.00"), new BigDecimal("0.500")),
                 new OrderLineInput("B", 1, new BigDecimal("5.00"), new BigDecimal("1.250"))));
-        order = new Order(new Customer(1L, "Jane Doe", "jane@example.com"), input);
+        order = new Order(Customer.builder().id(1L).name("Jane Doe").email("jane@example.com").build(), input);
     }
 
     @Test
@@ -52,9 +52,9 @@ class OrderStateManagerTest {
         ShippingRateRequest request = orderStateManager.startConfirmation(10L);
 
         assertThat(order.getStatus()).isEqualTo(OrderStatus.CONFIRMING);
-        assertThat(request.destinationPostalCode()).isEqualTo("28001");
-        assertThat(request.weightKg()).isEqualByComparingTo("2.250");
-        assertThat(request.numberOfPackages()).isEqualTo(1);
+        assertThat(request.getDestinationPostalCode()).isEqualTo("28001");
+        assertThat(request.getWeightKg()).isEqualByComparingTo("2.250");
+        assertThat(request.getNumberOfPackages()).isEqualTo(1);
         verify(orderRepository).save(order);
     }
 

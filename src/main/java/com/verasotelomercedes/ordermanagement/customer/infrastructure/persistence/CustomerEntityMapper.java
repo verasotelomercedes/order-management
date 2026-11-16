@@ -15,6 +15,6 @@ public class CustomerEntityMapper {
     }
 
     public Customer toDomain(CustomerEntity entity) {
-        return new Customer(entity.getId(), entity.getName(), entity.getEmail());
+        return Customer.builder().id(entity.getId()).name(entity.getName()).email(entity.getEmail()).build();
     }
 }

@@ -29,8 +29,8 @@ class CustomerServiceTest {
 
     @Test
     void shouldSaveNewCustomer() {
-        Customer customer = new Customer("Jane Doe", "jane@example.com");
-        Customer saved = new Customer(1L, "Jane Doe", "jane@example.com");
+        Customer customer = Customer.builder().name("Jane Doe").email("jane@example.com").build();
+        Customer saved = Customer.builder().id(1L).name("Jane Doe").email("jane@example.com").build();
         when(customerRepository.existsByEmail("jane@example.com")).thenReturn(false);
         when(customerRepository.save(customer)).thenReturn(saved);
 
@@ -41,7 +41,7 @@ class CustomerServiceTest {
 
     @Test
     void shouldRejectCustomerWithExistingEmail() {
-        Customer customer = new Customer("Jane Doe", "jane@example.com");
+        Customer customer = Customer.builder().name("Jane Doe").email("jane@example.com").build();
         when(customerRepository.existsByEmail("jane@example.com")).thenReturn(true);
 
         assertThatThrownBy(() -> customerService.create(customer))
@@ -52,7 +52,7 @@ class CustomerServiceTest {
 
     @Test
     void shouldReturnExistingCustomer() {
-        Customer customer = new Customer(1L, "Jane Doe", "jane@example.com");
+        Customer customer = Customer.builder().id(1L).name("Jane Doe").email("jane@example.com").build();
         when(customerRepository.findById(1L)).thenReturn(Optional.of(customer));
 
         assertThat(customerService.get(1L)).isSameAs(customer);

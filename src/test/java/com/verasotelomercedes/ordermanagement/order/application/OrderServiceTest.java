@@ -54,7 +54,7 @@ class OrderServiceTest {
 
     @BeforeEach
     void setUp() {
-        customer = new Customer(1L, "Jane Doe", "jane@example.com");
+        customer = Customer.builder().id(1L).name("Jane Doe").email("jane@example.com").build();
         input = new OrderInput(1L, "28001", List.of(
                 new OrderLineInput("A", 3, new BigDecimal("10.005"), new BigDecimal("0.500")),
                 new OrderLineInput("B", 1, new BigDecimal("2.50"), new BigDecimal("1.000"))));

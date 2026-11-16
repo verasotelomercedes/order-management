@@ -36,7 +36,7 @@ public class LogisticsRestClient implements ShippingRatePort {
     @Override
     public ShippingRate requestRate(ShippingRateRequest request) {
         RateResponseDto response = callWithRetries(new RateRequestDto(
-                request.destinationPostalCode(), request.weightKg(), request.numberOfPackages()));
+                request.getDestinationPostalCode(), request.getWeightKg(), request.getNumberOfPackages()));
         if (response == null || response.getCost() == null) {
             throw new ShippingRateException("Logistics provider returned no shipping cost");
         }

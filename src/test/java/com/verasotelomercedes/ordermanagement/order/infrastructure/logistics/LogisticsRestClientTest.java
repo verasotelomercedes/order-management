@@ -78,9 +78,9 @@ class LogisticsRestClientTest {
 
         ShippingRate rate = client("secret", 2, Duration.ofSeconds(2)).requestRate(REQUEST);
 
-        assertThat(rate.cost()).isEqualByComparingTo("7.95");
-        assertThat(rate.currency()).isEqualTo("EUR");
-        assertThat(rate.deliveryDays()).isEqualTo(2);
+        assertThat(rate.getCost()).isEqualByComparingTo("7.95");
+        assertThat(rate.getCurrency()).isEqualTo("EUR");
+        assertThat(rate.getDeliveryDays()).isEqualTo(2);
         assertThat(authHeaders).containsExactly("Bearer secret");
         assertThat(bodies.get(0))
                 .contains("\"codigoPostalDestino\":\"43840\"")
@@ -96,7 +96,7 @@ class LogisticsRestClientTest {
 
         ShippingRate rate = client("secret", 2, Duration.ofSeconds(2)).requestRate(REQUEST);
 
-        assertThat(rate.cost()).isEqualByComparingTo("7.95");
+        assertThat(rate.getCost()).isEqualByComparingTo("7.95");
         assertThat(calls.get()).isEqualTo(3);
     }
 

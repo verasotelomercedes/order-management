@@ -26,7 +26,7 @@ public class CustomerController {
 
     @PostMapping
     public ResponseEntity<CustomerResponseDto> create(@RequestBody CreateCustomerRequestDto request) {
-        Customer customer = customerService.create(new Customer(request.name, request.email));
+        Customer customer = customerService.create(Customer.builder().name(request.name).email(request.email).build());
         return ResponseEntity.created(URI.create("/api/clientes/" + customer.getId())).body(toResponse(customer));
     }
 
